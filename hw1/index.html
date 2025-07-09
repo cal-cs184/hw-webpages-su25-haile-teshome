@@ -27,7 +27,7 @@
 	</head>
 	<body>
 		<div class="container">
-		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
+		<h1>CS184/284A Summer 2025 Homework 1 Write-Up</h1>
 		<div style="text-align: center;">Names: </div>
 
 		<br>
@@ -43,41 +43,52 @@
 			<figcaption>You can add images with captions!</figcaption>
 		</figure>
 
-		<!--
-		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
-
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		The goal of this assignment was to implement a rasterizer that simulates the core functionality of a modern GPU rasterization pipeline. This project required building foundational graphics tools from scratch, with a focus on triangle rasterization, antialiasing through supersampling, color interpolation, geometric transformations, and texture mapping using various sampling techniques including mipmapping.
+		Each part of the assignment focused on a different stage of the rendering pipeline. Task 1 involved triangle rasterization, where I implemented edge-function-based point-in-triangle testing within a bounding box. In Task 2, I extended this approach with supersampling to perform antialiasing by distributing multiple samples per pixel. Task 3 explored transformations by manipulating a robot SVG to animate 
+		it using affine transformations. For Task 4, I implemented barycentric coordinate interpolation to blend vertex colors smoothly across triangles. In Task 5, I added support for pixel-level texture sampling, and in Task 6, I integrated level sampling with mipmaps for improved texture filtering and aliasing control.
+		Through this assignment, I gained an understanding of how precision and performance tradeoffs influence rendering quality. Implementing everything from bounding box rasterization to bilinear and trilinear sampling gave me a hands-on understanding of why GPUs do what they do—and just how much computation happens behind the scenes to draw a single triangle accurately. 
+		This project also taught me to think critically about performance, from loop unrolling to memoizing expensive calculations and reasoning about numerical stability when dealing with floating-point math in geometry.
+			
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
+		To rasterize single-color triangles, I implemented the rasterize_triangle() method in rasterizer.cpp. The method begins by determining the triangle’s axis-aligned bounding box, defined as the smallest rectangle that contains all three triangle vertices. This bounding box limits the pixel area that needs to be examined, reducing the computational workload compared to testing the entire frame buffer.
+		For each pixel within this bounding box, I implemented a supersampling strategy where each pixel is subdivided into a grid of sub-pixel samples. The total number of samples per pixel is defined by the sample_rate. Each sample is placed at the center of its subregion and for each sample point, I calculated three edge functions corresponding to each edge of the triangle. An edge function evaluates 
+		the signed area of the triangle formed by the sample point and two vertices of the triangle. If all three edge functions are non-negative (or all non-positive), the sample is inside the triangle, and I color that sample. This approach makes it so that my implementation is at least as efficient as checking every sample in the bounding box. I do not check pixels outside the bounding box, and for each 
+		sample I use efficient edge function evaluations instead of more complex geometric computations. Additionally, I ensured triangle orientation by computing signed area of the triangle was negative, I swapped two vertices to enforce a consistent clockwise winding. This helps keep the edge function signs consistent and avoid false negatives when determining whether a sample is inside the triangle.
+		
+		<figure>
+			<img src="screenshot_7-8_21-9-3.png" alt="Test4" style="width:50%"/>
+			<figcaption> Screenshot of Test 4 which has 5 different single color triangles</figcaption>
+		</figure>
+			
+		I performed several optimizations to accelerate triangle rasterization. First, I moved invariant computations outside inner loops—for example, computing edge deltas and storing them once. I also simplified the point-in-triangle test by using consistent winding and removing unnecessary computations. These optimizations yielded noticeable performance gains across several test SVGs.
+
+			
+		<table border="1" cellpadding="6" cellspacing="0">
+		  <thead>
+		    <tr>
+		      <th>Test Case</th>
+		      <th>Time Before Optimization</th>
+		      <th>Time After Optimization</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr><td>basic/test3.svg</td><td>6 ms</td><td>7 ms</td></tr>
+		    <tr><td>basic/test4.svg</td><td>0 ms</td><td>0 ms</td></tr>
+		    <tr><td>basic/test5.svg</td><td>0 ms</td><td>1 ms</td></tr>
+		    <tr><td>illustration/05_lion.svg</td><td>2 ms</td><td>3 ms</td></tr>
+		    <tr><td>illustration/09_kochcurve.svg</td><td>0 ms</td><td>0 ms</td></tr>
+		    <tr><td>hardcore/01_degenerate_square1.svg</td><td>31 ms</td><td>26 ms</td></tr>
+		    <tr><td>hardcore/02_degenerate_square2.svg</td><td>303 ms</td><td>238 ms</td></tr>
+		  </tbody>
+		</table>
+
+		Although the improvements may appear subtle for simpler scenes, they become significant in more complex inputs such as the degenerate square SVGs, where the triangle count and overlaps create a heavy rendering load.
+			
 		</div>
+
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
