@@ -56,7 +56,7 @@
 		sample I use efficient edge function evaluations instead of more complex geometric computations. Additionally, I ensured triangle orientation by computing signed area of the triangle was negative, I swapped two vertices to enforce a consistent clockwise winding. This helps keep the edge function signs consistent and avoid false negatives when determining whether a sample is inside the triangle.
 		
 		<figure>
-			<img src="screenshot_7-8_21-9-3.png" alt="Test4" style="width:50%"/>
+			<img src="screenshot_7-8_21-9-3.png"  alt="Test 4" width="400"/>
 			<figcaption> Figure 1: Screenshot of Test 4 which has 5 different single color triangles</figcaption>
 		</figure>
 			
@@ -230,38 +230,38 @@
 		gradients scaled by the texture’s width and height, and took the maximum of the two to estimate the appropriate mipmap level as log2(max(Lx, Ly)), following the lecture formula. Once this level is determined, it is clamped to the bounds of available mip levels and passed into the sample() method. For L_LINEAR, I computed a weighted blend between the sampled colors at floor(level) and ceil(level) using the fractional component as the 
 		blend factor. This achieves smoother transitions when the sampling level changes gradually across pixels. The following images show how the mipmap level sampling effect rendered images using our combinations of sampling settings:
 
-
-		These combinations demonstrate the tradeoffs inherent to level and pixel sampling. Using higher mip levels (i.e., lower resolution) sacrifices detail for speed and smoothness, while interpolating between texels and mip levels increases visual quality at the cost of computational effort. Supersampling further improves results but can quickly become memory-intensive, especially at high resolutions.
-		Overall, level sampling enables scalable, efficient, and visually consistent texture rendering in dynamic scenes. When combined with pixel-level interpolation and supersampling, it provides a flexible toolset for high-quality rasterization across a variety of viewing conditions.
-
 		<table align="center">
 		  <tr>
 		    <td>
 		      <figure>
-		        <img src="1_sample.png" alt="1 sample per pixel" width="400">
+		        <img src="L_0_P_N.png" alt="1 sample per pixel" width="400">
 		        <figcaption>Figure 11: L_ZERO + P_NEAREST: Uses full-resolution texture but shows strong aliasing.</figcaption>
 		      </figure>
 		    </td>
 		    <td>
 		      <figure>
-		        <img src="2_sample.png" alt="4 samples per pixel" width="400">
-		        <figcaption>Figure 12: L_ZERO + P_LINEAR: Still uses full-resolution mipmap, but interpolates between texels, smoothing the appearance slightly.</figcaption>
+		        <img src="L_0_P_L.png" alt="4 samples per pixel" width="400">
+		        <figcaption>Figure 12: L_ZERO + P_LINEAR: Still uses full-resolution mipmap, but interpolates between texels.</figcaption>
 		      </figure>
 		    </td>
 		    <td>
 		      <figure>
-		        <img src="3_sample.png" alt="16 samples per pixel" width="400">
-		        <figcaption>Figure 13: L_NEAREST + P_NEAREST: Chooses a lower mipmap level based on screen-space scale, reducing aliasing at the cost of slight blurriness.</figcaption>
+		        <img src="L_N_P_N.png" alt="16 samples per pixel" width="400">
+		        <figcaption>Figure 13: L_NEAREST + P_NEAREST: Chooses a lower mipmap level based on screen-space scale.</figcaption>
 		      </figure>
 		    </td>
 		     <td>
 		      <figure>
-		        <img src="3_sample.png" alt="16 samples per pixel" width="400">
-		        <figcaption>Figure 14: L_NEAREST + P_LINEAR: Adds interpolation between texels on the selected mip level, offering the cleanest and smoothest appearance of the four.</figcaption>
+		        <img src="L_N_P_L.png" alt="16 samples per pixel" width="400">
+		        <figcaption>Figure 14: L_NEAREST + P_LINEAR: Adds interpolation between texels on the selected mip level.</figcaption>
 		      </figure>
 		    </td>
 		  </tr>
 		</table>
+		These combinations demonstrate the tradeoffs inherent to level and pixel sampling. Using higher mip levels (lower resolution) sacrifices detail for speed and smoothness, while interpolating between texels and mip levels increases visual quality at the cost of computational effort. Supersampling further improves results but can quickly become memory-intensive, especially at high resolutions.
+		Overall, level sampling enables scalable, efficient, and visually consistent texture rendering in dynamic scenes.
+
+		
 		
 		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
 		I drew Brandon
