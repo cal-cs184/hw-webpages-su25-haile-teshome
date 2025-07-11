@@ -97,20 +97,28 @@
 		
 		For each pixel, I averaged the RGB values of all its sub-samples and wrote the result into the rgb_framebuffer_target, converting it into 8-bit integers suitable for display. This method effectively filters high-frequency aliasing artifacts by averaging over more fine-grained information, producing smoother and more natural-looking edges. 
 		
-		<div class="figure-row">
-		  <figure>
-		    <img src="1_sample.png" alt="1 sample per pixel" />
-		    <figcaption>1 sample per pixel</figcaption>
-		  </figure>
-		  <figure>
-		    <img src="2_sample.png" alt="4 samples per pixel" />
-		    <figcaption>4 samples per pixel</figcaption>
-		  </figure>
-		  <figure>
-		    <img src="3_sample.png" alt="16 samples per pixel" />
-		    <figcaption>16 samples per pixel</figcaption>
-		  </figure>
-		</div>
+		<table align="center">
+		  <tr>
+		    <td>
+		      <figure>
+		        <img src="1_sample.png" alt="1 sample per pixel" width="200">
+		        <figcaption>1 sample per pixel</figcaption>
+		      </figure>
+		    </td>
+		    <td>
+		      <figure>
+		        <img src="2_sample.png" alt="4 samples per pixel" width="200">
+		        <figcaption>4 samples per pixel</figcaption>
+		      </figure>
+		    </td>
+		    <td>
+		      <figure>
+		        <img src="3_sample.png" alt="16 samples per pixel" width="200">
+		        <figcaption>16 samples per pixel</figcaption>
+		      </figure>
+		    </td>
+		  </tr>
+		</table>
 
 
 		I evaluated the results by renduring basic/test4.svg with sample rates of 1, 4, and 16. At a sample rate of 1, triangle edges were clearly aliased, with noticeable stair-stepping especially on diagonals and thin shapes. At a rate of 4, edges improved significantly, showing smoother transitions and less shimmering. At 16, edges were almost perfectly smooth, with color transitions appearing continuous 
