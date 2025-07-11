@@ -215,103 +215,66 @@ namespace CGL {
   }
 
   void RasterizerImp::rasterize_textured_triangle(float x0, float y0, float u0, float v0,
-      float x1, float y1, float u1, float v1,
-      float x2, float y2, float u2, float v2,
-      Texture& tex)
-  {
-      // Create z_hat vector for convenience in computing the normal vector
-      Vector3D z(0, 0, 1);
+                                                float x1, float y1, float u1, float v1,
+                                                float x2, float y2, float u2, float v2,
+                                                Texture& tex) {
+    Vector3D A(x0, y0, 0), B(x1, y1, 0), C(x2, y2, 0), Z(0, 0, 1);
+    if (cross((B + C) * 0.5 - A, B - A).z < 0) std::swap(B, C);
 
-      // Create three screenspace triangle vertices
-      Vector3D p0(x0, y0, 0);
-      Vector3D p1(x1, y1, 0);
-      Vector3D p2(x2, y2, 0);
+    Vector3D N0 = cross(Z, A - B);
+    Vector3D N1 = cross(Z, B - C);
+    Vector3D N2 = cross(Z, C - A);
 
-      float denom = (y1 - y2)*(x0 - x2) + (x2 - x1)*(y0 - y2);
-      if (fabs(denom) < 1e-12f) return;
+    float x_vals[3] = { x0, x1, x2 }, y_vals[3] = { y0, y1, y2 };
+    int x_start = floor(std::min({ x0, x1, x2 }));
+    int x_end   = ceil(std::max({ x0, x1, x2 }));
+    int y_start = floor(std::min({ y0, y1, y2 }));
+    int y_end   = ceil(std::max({ y0, y1, y2 }));
 
-      if (cross(((p1 + p2) / 2) - p0, p1 - p0).z < 0) {
-          swap(p1, p2);
-      }
+    int res = (int)std::sqrt(sample_rate);
+    float step = 1.0f / res;
 
+    Matrix3x3 Bmat(x0, x1, x2, y0, y1, y2, 1, 1, 1);
+    Bmat = Bmat.inv();
+    Vector3D U(u0, u1, u2), V(v0, v1, v2);
 
-      Vector3D lin0 = p0 - p1;
-      Vector3D lin1 = p1 - p2;
-      Vector3D lin2 = p2 - p0;
-      // Find clockwise normals for each line (these point INTO the triangle)
-      Vector3D n0 = cross(z, lin0);
-      Vector3D n1 = cross(z, lin1);
-      Vector3D n2 = cross(z, lin2);
+    SampleParams samp;
+    samp.psm = psm;
+    samp.lsm = lsm;
 
-      // Bounding box limits for triangle
-      float x_list[] = { x0,x1,x2 };
-      float y_list[] = { y0,y1,y2 };
-      // x pixel bounds
-      int minx = (int)floor(*std::min_element(x_list, x_list + 3));
-      int maxx = (int)ceil(*std::max_element(x_list, x_list + 3));
-      // y pixel bounds
-      int miny = (int)floor(*std::min_element(y_list, y_list + 3));
-      int maxy = (int)ceil(*std::max_element(y_list, y_list + 3));
+    for (int y = y_start; y < y_end; ++y) {
+        for (int x = x_start; x < x_end; ++x) {
+            int idx = 0;
+            for (int j = 0; j < res; ++j) {
+                float sy = y + (j + 0.5f) * step;
+                for (int i = 0; i < res; ++i) {
+                    float sx = x + (i + 0.5f) * step;
+                    Vector3D P(sx, sy, 1);
+                    if (dot(P - B, N0) >= 0 && dot(P - C, N1) >= 0 && dot(P - A, N2) >= 0) {
+                        Vector3D W = Bmat * P;
+                        Vector3D W_dx = Bmat * (P + Vector3D(1, 0, 0));
+                        Vector3D W_dy = Bmat * (P + Vector3D(0, 1, 0));
 
-      // Get sample rate 
-      int sr = sqrt(sample_rate);   // sample rate in 1D
+                        W.z = 1.0f - W.x - W.y;
+                        W_dx.z = 1.0f - W_dx.x - W_dx.y;
+                        W_dy.z = 1.0f - W_dy.x - W_dy.y;
 
-      // Instantiate SampleParams structure for setting up sampling method
-      SampleParams S;
-      S.lsm = lsm;
-      S.psm = psm;
-      
-      // Matrix and vectors for computing berrycentric weights
-      Matrix3x3 M(x0, x1, x2, y0, y1, y2, 1, 1, 1);
-      M = M.inv();
-      Vector3D u = Vector3D(u0, u1, u2);
-      Vector3D v = Vector3D(v0, v1, v2);
+                        samp.p_uv = Vector2D(dot(W, U), dot(W, V));
+                        samp.p_dx_uv = Vector2D(dot(W_dx, U), dot(W_dx, V)) - samp.p_uv;
+                        samp.p_dy_uv = Vector2D(dot(W_dy, U), dot(W_dy, V)) - samp.p_uv;
 
-      // Loop through pixels in bounding box of triangle
-      for (int y = miny; y < maxy; y++) {
-          for (int x = minx; x < maxx; x++) {
-              Vector3D p(x, y, 1);   
-              int s = 0;          
-
-              for (int j = 0; j < sr; j++) {
-                  p.y = (float)y + ((float)j + 0.5) / (float)sr;
-
-                  for (int i = 0; i < sr; i++) {
-                      p.x = (float)x + ((float)i + 0.5) / (float)sr;
-
-                      // Line test: Is pixel inside or outside of the triangle?
-                      if ((dot(p - p1, n0) >= 0) && (dot(p - p2, n1) >= 0) && (dot(p - p0, n2) >= 0)) {
-
-                          Vector3D w_p = M * p;                             // Get Alpha, Beta, Gamma for berrycentric coords of p = (x,y)
-                          Vector3D w_p_dx = M * (p + Vector3D(1, 0, 0));    // Get Alpha, Beta, Gamma for berrycentric coords of p_dx = (x+1,y)
-                          Vector3D w_p_dy = M * (p + Vector3D(0, 1, 0));    // Get Alpha, Beta, Gamma for berrycentric coords of p_dy = (x, y+1)
-                          
-                  
-                          w_p.z = 1 - w_p.x - w_p.y;     
-                          w_p_dx.z = 1 - w_p_dx.x - w_p_dx.y;
-                          w_p_dy.z = 1 - w_p_dy.x - w_p_dy.y;
-
-                 
-                          
-                          Vector2D p_uv = Vector2D(dot(w_p, u), dot(w_p, v));
-                          Vector2D p_uv_dx = Vector2D(dot(w_p_dx, u), dot(w_p_dx, v));
-                          Vector2D p_uv_dy = Vector2D(dot(w_p_dy, u), dot(w_p_dy, v));
-                          
-                          
-                          // Make differential by subtracting target uv coordinate from uv cordinates resulting mapping to (x+1,y) and (x,y+1)
-                          S.p_uv = p_uv;
-                          S.p_dx_uv = p_uv_dx - p_uv;
-                          S.p_dy_uv = p_uv_dy - p_uv;
-
-                          Color c = tex.sample(S);
-                          fill_supersample(x, y, s, c);
-                      }
-                      s++;
-                  }
-              }
-          }
-      }
+                        Color col = tex.sample(samp);
+                        fill_supersample(x, y, idx, col);
+                    }
+                    ++idx;
+                }
+            }
+        }
+    }
   }
+
+
+
   void RasterizerImp::fill_supersample(size_t px,        // pixel-x
     size_t py,        // pixel-y
     size_t sub,       // sub-sample index
