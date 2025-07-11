@@ -91,8 +91,38 @@
 
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		This task extends the triangle rasterization to support supersampling, which is a technique for antialiasing that improves image quality by taking multiple color samples within each pixel. Instead of evaluating a single sample at the center of a pixel, supersampling will subdivides each pixel into a grid of sub-pixel samples. By averaging the results of these samples, we can reduce 
+		
+		aliasing artifacts like jaggies and harsh color transitions. To implement this, I modified the rasterization pipeline to use a sample_buffer instead of writing colors directly into the rgb_framebuffer_target. This buffer stores a floating-point Color value for each sub-sample, and its size is dynamically updated to be width * height * sample_rate. The number of sub-samples per 
+		
+		pixel is equal to sample_rate, and these sub-samples are distributed uniformly in a √N x √N grid within each pixel. In the rasterize_triangle() function, I looped over each pixel in the triangle's bounding box and then looped through each sub-sample within the pixel. Each sub-sample’s exact screen coordinate is calculated using an offset based on its position in the sub-grid (for example,
+		
+		x + (i + 0.5) / sqrt_rate and y + (j + 0.5) / sqrt_rate). For every sub-sample, I performed the same edge function point-in-triangle test used in Task 1 to determine whether the sample was inside the triangle. If it was, the corresponding entry in the sample_buffer was set to the triangle’s color. After rasterizing all primitives, the final pixel color is determined in resolve_to_framebuffer().
+		
+		For each pixel, I averaged the RGB values of all its sub-samples and wrote the result into the rgb_framebuffer_target, converting it into 8-bit integers suitable for display. This method effectively filters high-frequency aliasing artifacts by averaging over more fine-grained information, producing smoother and more natural-looking edges. 
+		
+		<figure>
+			<img src="1_sample.png" alt="Test4" style="width:50%"/>
+			<figcaption> 1 samples per pixel</figcaption>
+		</figure>
+		
+		<figure>
+			<img src="2_sample.png" alt="Test4" style="width:50%"/>
+			<figcaption> 4 samples per pixel</figcaption>
+		</figure>
+		
+		<figure>
+			<img src="3_sample.png" alt="Test4" style="width:50%"/>
+			<figcaption> 16 samples per pixel</figcaption>
+		</figure>
 
+		I evaluated the results by renduring basic/test4.svg with sample rates of 1, 4, and 16. At a sample rate of 1, triangle edges were clearly aliased, with noticeable stair-stepping especially on diagonals and thin shapes. At a rate of 4, edges improved significantly, showing smoother transitions and less shimmering. At 16, edges were almost perfectly smooth, with color transitions appearing continuous 
+		
+		even under the pixel inspector. Supersampling dramatically improves visual quality by capturing sub-pixel coverage information and especially when dealing with high-frequency detail or sharp geometry, where binary rasterization would otherwise fail to represent the smoothness of the shape. By integrating more samples per pixel, it provides a better approximation a more accurate 
+		
+		coverage function and mitigates the visual discontinuities caused by limited resolution.
+
+		
 		<h2>Task 3: Transforms</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
