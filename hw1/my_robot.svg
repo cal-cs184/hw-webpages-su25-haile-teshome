@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+     width="500" height="500" viewBox="0 0 500 500">
+<g transform="translate(250 250)">
+
+  <!-- BODY (slightly wider and lower) -->
+  <g transform="translate(0 55) scale(1.2 1.4)">
+    <!-- Outer Body -->
+    <polygon fill="#000000" points="0,-35 28,0 0,35 -28,0"/>
+    <!-- Tuxedo Belly -->
+    <polygon fill="#ffffff" points="0,-25 18,0 0,25 -18,0"/>
+    <!-- Bow Tie -->
+    <polygon fill="#e63946" points="-5,-8 0,-3 5,-8 0,-13"/>
+  </g>
+
+  <!-- HEAD -->
+  <g transform="translate(0 -20)">
+    <polygon fill="#dce6f5" points="-25,0 0,-25 25,0 0,25"/>
+
+    <!-- EYES -->
+    <g transform="translate(-8 -5)">
+      <polygon fill="#000000" points="-3,0 0,-3 3,0 0,3"/>
+    </g>
+    <g transform="translate(8 -5)">
+      <polygon fill="#000000" points="-3,0 0,-3 3,0 0,3"/>
+    </g>
+
+    <!-- BEAK -->
+    <g transform="translate(0 7)">
+      <polygon fill="#e0b347" points="-8,0 0,-5 8,0 0,5"/>
+    </g>
+
+    <!-- NAVY HAT -->
+    <g transform="translate(0 -20)">
+      <polygon fill="#2c3e75" points="-20,0 20,0 16,-6 -16,-6"/>
+      <polygon fill="#1e2b56" points="-12,-6 12,-6 8,-12 -8,-12"/>
+    </g>
+  </g>
+
+  <!-- WINGS -->
+  <g transform="translate(-40 50) rotate(-25)">
+    <polygon fill="#dce6f5" points="-6,0 0,-18 6,0 0,18"/>
+  </g>
+  <g transform="translate(40 50) rotate(25)">
+    <polygon fill="#dce6f5" points="-6,0 0,-18 6,0 0,18"/>
+  </g>
+
+  <!-- FEET -->
+  <g transform="translate(-10 120)">
+    <polygon fill="#e0b347" points="-6,0 0,-8 6,0 0,8"/>
+  </g>
+  <g transform="translate(10 120)">
+    <polygon fill="#e0b347" points="-6,0 0,-8 6,0 0,8"/>
+  </g>
+
+  
+</g>
+</svg>

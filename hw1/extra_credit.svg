@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+     width="800" height="800" viewBox="0 0 800 800">
+
+  <!-- FULL BACKGROUND -->
+  <rect x="0" y="0" width="800" height="800" fill="#cccccc"/>
+
+  <!-- SLENDER MAN FIGURE -->
+  <g transform="translate(400 400)">
+
+    <!-- HEAD -->
+    <g transform="translate(0 -130)">
+      <rect x="-25" y="-25" width="50" height="50" fill="ffffff"/>
+    </g>
+
+    <!-- TORSO -->
+    <g>
+      <rect x="-20" y="-90" width="40" height="150" fill="black"/>
+    </g>
+
+    <!-- RED TIE -->
+    <g transform="translate(0 -60)">
+      <polygon fill="#ff1f1f" points="0,0 5,20 0,40 -5,20"/>
+    </g>
+
+    <!-- RIGHT ARM (waving) -->
+    <g transform="translate(20 -80)">
+      <!-- Upper arm -->
+      <g transform="rotate(-30)">
+        <rect x="0" y="0" width="15" height="60" fill="black"/>
+      </g>
+      <!-- Lower arm -->
+      <g transform="translate(35 50) rotate(15)">
+        <rect x="0" y="0" width="15" height="60" fill="black"/>
+      </g>
+    </g>
+
+    <!-- LEFT ARM -->
+    <g transform="translate(-20 -80)">
+      <!-- Upper arm -->
+      <g transform="rotate(-90)">
+        <rect x="0" y="0" width="15" height="60" fill="black"/>
+      </g>
+      <!-- Lower arm -->
+      <g transform="translate(-5 55) rotate(10)">
+        <rect x="0" y="0" width="15" height="60" fill="black"/>
+      </g>
+    </g>
+
+    <!-- RIGHT LEG -->
+    <g transform="translate(10 60)">
+      <!-- Upper leg -->
+      <g transform="rotate(15)">
+        <rect x="0" y="0" width="15" height="80" fill="black"/>
+      </g>
+      <!-- Lower leg -->
+      <g transform="translate(0 80) rotate(-5)">
+        <rect x="0" y="0" width="15" height="80" fill="black"/>
+      </g>
+    </g>
+
+    <!-- LEFT LEG -->
+    <g transform="translate(-25 60)">
+      <!-- Upper leg -->
+      <g transform="rotate(-10)">
+        <rect x="0" y="0" width="15" height="80" fill="black"/>
+      </g>
+      <!-- Lower leg -->
+      <g transform="translate(-5 80) rotate(10)">
+        <rect x="0" y="0" width="15" height="80" fill="black"/>
+      </g>
+    </g>
+
+  </g>
+</svg>
